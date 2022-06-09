@@ -1,10 +1,12 @@
 #ifndef BS__READER_H_
 #define BS__READER_H_
 #include "user.h"
+#include <istream>
 //#include <curses.h>
 
 class Reader : public User
 {
+    friend ostream & operator<<(ostream & os, const User & user);
 private:
     using only_read_ret = const string &;
 public:
@@ -26,7 +28,7 @@ public:
         return _name;
     }
 
-    [[nodiscard]] only_read_ret getPlace() const
+    only_read_ret getPlace() const
     {
         return _place;
     }
@@ -60,7 +62,9 @@ private:
     string _name;
     string _place;
     string _contact_details;
-    const int _flag;
+    int _flag;
     int _borrowed;
 };
+
+ostream & operator<<(ostream & os, const User & user);
 #endif

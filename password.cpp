@@ -1,5 +1,5 @@
 #include "password.h"
-
+#include "tools.h"
 
 const string Password::getNew(const string & mess)
 {

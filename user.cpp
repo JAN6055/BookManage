@@ -7,6 +7,12 @@ ostream & operator<<(ostream & os, const User & user)
     return os;
 }
 
+/**
+ * @brief 从绑定的文件流中获取一个用户，用户的格式必须固定，否则会出错误
+ * 
+ * @param is 
+ * @return User* 这个指针必须被处理，转换成shared_ptr
+ */
 User * read(istream & is)
 {
     int id;

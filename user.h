@@ -12,8 +12,12 @@ using std::istream;
 class User
 {
     friend ostream & operator<<(ostream & os, const User & user);
+    friend class LibMS;
 public:
     enum {USES_ADMIN = 1, BOOK_ADMIN = 2, READER = 3};
+    
+    User() : _id(0), _flag(READER)
+    { }
     User(int id, const string & password, int flag = READER)
         : _id(id), _password(password), _flag(flag)
     { }
@@ -44,9 +48,9 @@ public:
 protected:
     static User * read(istream & is);
 private:
-    const int _id;
+    int _id;
     string _password;
-    const int _flag;
+    int _flag;
 };
 
 ostream & operator<<(ostream & os, const User & user);

@@ -38,18 +38,26 @@ private:
     void readAllBookBorrowedTot(const string & path);
     void readAllReaderBorrowTot(const string & path);
 
-    weak_ptr<User> _loging_user;
+    weak_ptr<User>       _loging_user;
     //                         key, data
-    //uid and uname is only
+    //uid rid is only
     using uid_set_type   = set<shared_ptr<User>>;
-    using uname_map_type = map<string,weak_ptr<User>>;
-    //bid is only bname and other is not only
+    using rid_set_type   = set<shared_ptr<Reader>>;
+    using rname_map_type = map<string,weak_ptr<Reader>>;
+    //bid is only and others is not only
     using bid_set_type   = set<shared_ptr<Book>>;
     using bname_map_type = multimap<string,weak_ptr<Book>>;
     using baut_map_type  = multimap<string,weak_ptr<Book>>;
     using bpub_map_type  = multimap<string,weak_ptr<Book>>;
 
-    
+    uid_set_type         _uid_set;
+    rid_set_type         _rid_set;
+    rname_map_type       _rname_map;
+
+    bid_set_type         _bid_set;
+    bname_map_type       _bname_map;
+    baut_map_type        _baut_map;
+    bpub_map_type        _bpub_map;
 };
 
 #endif
