@@ -1,5 +1,5 @@
-#ifndef __READER_H_
-#define __READER_H_
+#ifndef BS__READER_H_
+#define BS__READER_H_
 #include "user.h"
 #include <curses.h>
 
