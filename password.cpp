@@ -29,7 +29,7 @@ int Password::checkInvalid(const string & password, bool is_print_message)
     {
         if(is_print_message)
             cout << "密码不能大于12位" << endl;
-        return PASSWORLD_LONG;
+        return PASSWORD_LONG;
     }
     else
         return PASS;

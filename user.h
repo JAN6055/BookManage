@@ -11,13 +11,16 @@ using std::istream;
 #include <memory>
 class User
 {
-    friend ostream & operator<<(ostream * os, const User & user);
+    friend ostream & operator<<(ostream & os, const User & user);
 public:
-    enum {UERS_ADMIN = 1, BOOK_ADMIN = 2, READER = 3};
+    enum {USES_ADMIN = 1, BOOK_ADMIN = 2, READER = 3};
     User(int id, const string & password, int flag = READER)
         : _id(id), _password(password), _flag(flag)
     { }
 
+    User(int id, string && password, int flag = READER)
+        : _id(id), _password(std::move(password)), _flag(flag)
+    { }
     void setPassword(const string & new_password)
     {
         _password = new_password;
@@ -34,12 +37,12 @@ public:
     {
         return _password;
     }
-    int getFlag() const
+    virtual int getFlag() const
     {
         return _flag;
     }
 protected:
-    static User * read(ostream & os);
+    static User * read(istream & is);
 private:
     const int _id;
     string _password;

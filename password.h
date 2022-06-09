@@ -1,6 +1,5 @@
 #ifndef BS__PASSWORD_H_
 #define BS__PASSWORD_H_
-#include "tools.h"
 #include <algorithm>
 #include <iostream>
 #include <string>
@@ -11,7 +10,7 @@ using std::endl;
 class Password
 {
 public:
-    enum {PASS = 0, PASSWORD_SHORT = 1, PASSWORLD_LONG = 2};
+    enum {PASS = 0, PASSWORD_SHORT = 1, PASSWORD_LONG = 2};
     static const string getNew(const string & mess);
     static int checkInvalid(const string & password,
                              bool is_print_message =false);

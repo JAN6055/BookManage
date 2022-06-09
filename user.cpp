@@ -7,12 +7,12 @@ ostream & operator<<(ostream & os, const User & user)
     return os;
 }
 
-User * read(ostream & os)
+User * read(istream & is)
 {
     int id;
     string password;
     int flag;
-    os << id << password << flag;
+    is >> id >> password >> flag;
     return new User(id,std::move(password),flag);
 }
 

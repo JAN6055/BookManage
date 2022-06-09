@@ -1,7 +1,7 @@
 #ifndef BS__READER_H_
 #define BS__READER_H_
 #include "user.h"
-#include <curses.h>
+//#include <curses.h>
 
 class Reader : public User
 {
@@ -15,12 +15,18 @@ public:
         : User(id,password,READER), _name(name), _place(place),
          _contact_details(contact_details), _flag(flag), _borrowed(0)
     { }
+    Reader(int id, string && password, string && name, string && place,
+        string && contact_details, int flag)
+        : User(id, std::move(password),READER), _name(std::move(name)),
+          _place(std::move(place)), _contact_details(std::move(contact_details)),
+          _flag(flag), _borrowed(0)
+    { }
     only_read_ret getName() const 
     {
         return _name;
     }
 
-    only_read_ret getPlace() const
+    [[nodiscard]] only_read_ret getPlace() const
     {
         return _place;
     }
@@ -29,7 +35,7 @@ public:
         return _contact_details;
     }
 
-    int getFlag() const
+    int getFlag() const override
     {
         return _flag;
     }

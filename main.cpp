@@ -1,5 +1,5 @@
 #include <cstdio>
-#include <curses.h>
+//#include <curses.h>
 #include <iostream>
 
 
