@@ -8,6 +8,7 @@
 #include <string>
 using std::string;
 
+char getch();
 char getche();
 
 using std::less;
@@ -60,6 +61,7 @@ struct less_bpub
     
 };
 
+int get_uid();
 
 
 #endif

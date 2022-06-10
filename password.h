@@ -3,6 +3,7 @@
 #include <algorithm>
 #include <iostream>
 #include <string>
+// #include "user.h"
 
 using std::string;
 using std::cout;
@@ -16,7 +17,23 @@ public:
                              bool is_print_message =false);
     
     template <typename T>
-    static bool setNewPassword(T & t);
+    static bool setNewPassword(T & t)
+    {
+        string new_password = getNew("请输入密码:");
+        string new_password_again = getNew("\n再次输入密码:");
+        if(new_password != new_password_again)
+        {
+            cout << "两次密码不相同" << endl;
+            return false;
+        }
+        else if(checkInvalid(new_password) == PASS)
+        {
+            t.setPassword(std::move(new_password));
+            return true;
+        }
+        else
+            return false; 
+        }
 
 };
 

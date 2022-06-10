@@ -32,10 +32,9 @@ void user_info_change_menu()
 {
     system("clear");
     printf("+-----------------------+\n");
-    printf("\t1.修改 id\n");
-    printf("\t2.修改密码\n");
-    printf("\t3.修改权限\n");
-    printf("\t4.退出\n");
+    printf("\t1.修改密码\n");
+    printf("\t2.修改权限\n");
+    printf("\t3.退出\n");
     printf("+-----------------------+\n");
  
 }
@@ -54,7 +53,7 @@ void reader_man_menu()
 {
     system("clear");
     printf("+-----------------------+\n");
-    printf("\t1.读者信息输入\n");
+    printf("\t1.新建读者\n");
     printf("\t2.读者信息修改\n");
     printf("\t3.读者信息删除\n");
     printf("\t4.读者信息查询\n");
@@ -125,9 +124,11 @@ void book_info_change_menu()
 {
     system("clear");
     printf("+-----------------------+\n");
-    printf("\t1.修改藏书量\n");
-    printf("\t2.修改借书量\n");
-    printf("\t3.退出\n");
+    printf("\t1.修改书名\n");
+    printf("\t2.修改作者\n");
+    printf("\t3.修改出版社\n");
+    printf("\t4.修改藏书量\n");
+    printf("\t5.退出\n");
     printf("+-----------------------+\n");
 }
  

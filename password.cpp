@@ -7,7 +7,7 @@ const string Password::getNew(const string & mess)
     char ch;
     int i = 0;
     std::cout << mess;
-    while ((ch = getche()) && ch != '\n')
+    while ((ch = getch()) && ch != '\n')
     {
         buffer[i++] = ch;
         std::cout << '*';
@@ -33,19 +33,6 @@ int Password::checkInvalid(const string & password, bool is_print_message/*=fals
     }
     else
         return PASS;
-}
-
-template <typename T>
-bool Password::setNewPassword(T & t)
-{
-    string new_password = getNew("请输入密码:");
-    if(checkInvalid(new_password) == PASS)
-    {
-        t.setPassword(std::move(new_password));
-        return true;
-    }
-    else
-        return false;
 }
 
 
