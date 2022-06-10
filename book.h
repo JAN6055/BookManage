@@ -53,14 +53,14 @@ public:
         _book_name = std::move(new_name);
     }
 
-    void setAuthor(const string & new_anuthor)
+    void setAuthor(const string &new_author)
     {
-        _author = new_anuthor;
+        _author = new_author;
     }
 
-    void setAuthor(string && new_anuthor)
+    void setAuthor(string &&new_author)
     {
-        _author = std::move(new_anuthor);
+        _author = std::move(new_author);
     }
 
     void setPub(const string & new_pub)
@@ -83,5 +83,5 @@ private:
 };
 
 ostream & operator<<(ostream & os, const Book & book);
-istream & operator<<(istream & is, Book & book);
+istream & operator>>(istream & is, Book & book);
 #endif
