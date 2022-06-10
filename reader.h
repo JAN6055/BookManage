@@ -1,9 +1,9 @@
 #ifndef BS__READER_H_
 #define BS__READER_H_
 #include "user.h"
-#include <istream>
-//#include <curses.h>
-
+#include <fstream>
+#include <memory>
+using std::shared_ptr;
 class Reader : public User
 {
     friend ostream & operator<<(ostream & os, const User & user);
@@ -13,15 +13,15 @@ public:
     enum {STUDENT = 1, TEACHER = 2};
     enum {STUDENT_ABLE_BORROW = 5, TEACHER_ABLE_BORROW = 10};
     Reader(int id, const string & password, const string & name, const string & place, 
-        const string & contact_details, int flag)
+        const string & contact_details, int flag,int borrowed = 0)
         : User(id,password,READER), _name(name), _place(place),
-         _contact_details(contact_details), _flag(flag), _borrowed(0)
+         _contact_details(contact_details), _flag(flag), _borrowed(borrowed)
     { }
     Reader(int id, string && password, string && name, string && place,
-        string && contact_details, int flag)
+        string && contact_details, int flag, int borrowed = 0)
         : User(id, std::move(password),READER), _name(std::move(name)),
           _place(std::move(place)), _contact_details(std::move(contact_details)),
-          _flag(flag), _borrowed(0)
+          _flag(flag), _borrowed(borrowed)
     { }
     only_read_ret getName() const 
     {
@@ -58,6 +58,7 @@ public:
             return;
         ++_borrowed;
     }
+    static shared_ptr<Reader> read(ifstream & fis);
 private:
     string _name;
     string _place;

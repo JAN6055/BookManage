@@ -2,22 +2,17 @@
 #define BS__USER_H_
 #include "password.h"
 #include <iostream>
-#include <iterator>
-#include <ostream>
-#include <sstream>
-#include <string>
-using std::ostream;
-using std::istream;
+#include <fstream>
 #include <memory>
+using std::ostream;
+using std::ifstream;
+using std::shared_ptr;
 class User
 {
     friend ostream & operator<<(ostream & os, const User & user);
-    friend class LibMS;
 public:
     enum {USES_ADMIN = 1, BOOK_ADMIN = 2, READER = 3};
     
-    User() : _id(0), _flag(READER)
-    { }
     User(int id, const string & password, int flag = READER)
         : _id(id), _password(password), _flag(flag)
     { }
@@ -45,10 +40,10 @@ public:
     {
         return _flag;
     }
+    static shared_ptr<User> read(ifstream & is);
 protected:
-    static User * read(istream & is);
-private:
     int _id;
+private:
     string _password;
     int _flag;
 };

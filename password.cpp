@@ -16,7 +16,7 @@ const string Password::getNew(const string & mess)
     return string(buffer);
 }
 
-int Password::checkInvalid(const string & password, bool is_print_message)
+int Password::checkInvalid(const string & password, bool is_print_message/*=false*/)
 {
     auto len = password.length();
     if(len < 8)

@@ -5,5 +5,5 @@ project(BookManage)
 
 add_executable(main.cpp book.cpp date.cpp
         lib_management_sys.cpp menu.cpp password.cpp tools.cpp
-        user.cpp)
+        user.cpp reader.cpp)
 

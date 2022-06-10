@@ -1,6 +1,7 @@
 #include "user.h"
-#include <ostream>
-
+#include <fstream>
+#include <memory>
+using std::make_shared;
 ostream & operator<<(ostream & os, const User & user)
 {
     os << user.getId() << " " << user.getPassword() << " " << user.getFlag();
@@ -13,13 +14,13 @@ ostream & operator<<(ostream & os, const User & user)
  * @param is 
  * @return User* 这个指针必须被处理，转换成shared_ptr
  */
-User * read(istream & is)
+shared_ptr<User> User::read(ifstream & is)
 {
     int id;
     string password;
     int flag;
     is >> id >> password >> flag;
-    return new User(id,std::move(password),flag);
+    return make_shared<User>(id,std::move(password),flag);
 }
 
 
