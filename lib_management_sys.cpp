@@ -1,15 +1,19 @@
 #include "lib_management_sys.h"
 #include "menu.h"
+#include "password.h"
 #include "tools.h"
 #include "user.h"
+#include "reader.h"
 #include <cctype>
 #include <cstdlib>
 #include <exception>
 #include <fstream>
 #include <iostream>
+#include <iterator>
 #include <memory>
 #include <ostream>
 #include <pthread.h>
+#include <string>
 
 using std::cin;
 using std::ifstream;
@@ -54,7 +58,7 @@ void LibMS::readAllBook(const string &path) {
   ifstream fin;
   fin.open(path.c_str());
   if (!fin.is_open()) {
-    cerr << "file" << path << endl;
+    cerr << "file" << path << "open fail" << endl;
     std::abort();
   }
   while (!fin.eof()) {
@@ -66,6 +70,29 @@ void LibMS::readAllBook(const string &path) {
     _baut_map.insert({book->getAuthor(), weak_ptr<Book>(_book)});
     _bpub_map.insert({book->getPub(), weak_ptr<Book>(_book)});
   }
+  fin.close();
+}
+
+void LibMS::writeAllBook(const string & path)
+{
+    ofstream fout;
+    fout.open(path.c_str());
+    if(!fout.is_open())
+    {
+        cerr << "file" << path << "open fail" << endl;
+        std::abort();
+    }
+
+    auto size = _bid_map.size();
+    int i = 0;
+    for(const auto & _pair : _bid_map)
+    {
+        if(++i == size)
+            fout << *_pair.second;
+        else
+            fout << *_pair.second << endl;
+    }
+    fout.close();
 }
 
 void LibMS::readAllReader(const string &path) {
@@ -78,10 +105,30 @@ void LibMS::readAllReader(const string &path) {
   while (!fin.eof()) {
     shared_ptr<Reader> reader(Reader::read(fin));
     _rid_map.insert({reader->getId(),reader});
-    _rname_map.insert({reader->getName(), reader});
+    _rname_map.insert({reader->getName(), weak_ptr<Reader>(reader)});
   }
 }
 
+void LibMS::writeAllReader(const string & path)
+{
+    ofstream fout;
+    fout.open(path.c_str());
+    if(!fout.is_open())
+    {
+        cerr << "file" << path << "open fail" << endl;
+        std::abort();
+    }
+    auto size = _rid_map.size();
+    int i = 0;
+    for (const auto & it : _rid_map)
+    {
+        cout << "write a" << endl;
+        if(++i == size)
+            fout << *it.second;
+        else
+            fout << *it.second << endl;
+    }
+}
 void LibMS::run() {
   while (true) {
     start_menu();
@@ -94,7 +141,7 @@ void LibMS::run() {
         main_scence();
       }
     } else if (ch == '2') {
-      if (sing_up())
+      if (sing_up(SING_STYLE::NO_READER))
         cout << "sing in success" << endl;
       getch();
     } else if (ch == '3') {
@@ -128,7 +175,7 @@ bool LibMS::log_in() {
   return false;
 }
 
-bool LibMS::sing_up() {
+bool LibMS::sing_up(SING_STYLE style) {
   int uid = get_uid();
   if (uid == 0) {
     cout << "输入的uid不合法" << endl;
@@ -140,10 +187,45 @@ bool LibMS::sing_up() {
     cout << "账号重复" << endl;
     return false;
   }
-  cout << "以哪种权限注册(1/2/3)" << endl;
+
+    if(style == SING_STYLE::READER)
+    {
+        string name;
+        cout << "请输入姓名:";
+        cin >> name;
+        string place;
+        cout << "请输入住址:";
+        cin >> place;
+        string phone;
+        cout << "请输入联系方式:";
+        cin >> phone;
+        cin.get();
+        char ch;
+        cout << "教工/学生(1/2)";
+        ch = getch();
+        ch -= 48;
+        if(ch != Reader::STUDENT && ch != Reader::TEACHER)
+        {
+            cout << "输入违法" << endl;
+            return false;
+        }
+        auto reader = std::make_shared<Reader>(uid,"",
+                      name,place,phone,ch);
+        if(!Password::setNewPassword(*reader))
+        {
+          cout << "违法输入" << endl;
+          return false;
+        }
+        _uid_map.insert({uid,std::make_shared<User>(uid,reader->getPassword(),User::READER)});
+        _rid_map.insert({uid,reader});
+        _rname_map.insert({reader->getName(),weak_ptr<Reader>(reader)});
+        return true;
+    }
+  cout << "user admin/book admin(1/2)" << endl;
+
   char flag = getch();
   flag -= 48;
-  if (flag < User::USES_ADMIN || flag > User::READER) {
+  if (flag < User::USES_ADMIN || flag > User::BOOK_ADMIN) {
     cout << "违法输入" << endl;
     return false;
   }
@@ -191,17 +273,39 @@ void LibMS::user_manage_scence() {
         getch();
       break;
     case '2':
-      user_info_change_scence();
+    {
+    int uid = get_uid();
+      if(uid == 0)
+      {
+        cout << "输入的uid不合法" << endl;
+        getch();
+        continue;
+      }
+      auto finded = _uid_map.find(uid);
+      if(finded == _uid_map.end())
+      {
+        cout << "不存在此用户" << endl;
+        continue;
+      }
+      user_info_change_scence(*finded->second);
+    }
       break;
     case '3':
       // delete a user
       {
 
       int uid = get_uid();
+      if(uid == 0)
+      {
+        cout << "输入的uid不合法" << endl;
+        getch();
+        continue;
+      }
       auto finded = _uid_map.find(uid);
       if(finded == _uid_map.end())
       {
         cout << "不存在此用户" << endl;
+        continue;
       }
       _uid_map.erase(uid);
       if(finded->second->getFlag() == User::READER)
@@ -229,23 +333,69 @@ void LibMS::user_manage_scence() {
 void LibMS::reader_manage_scence() {
   while (true) {
     reader_man_menu();
-
     char ch = getch();
     switch (ch) {
     case '1':
       // sing up a reader
+      if(sing_up())
+        cout << "sing up success" << endl;
+    getch();
+
       break;
     case '2':
-      reader_info_change_scence();
+    {
+    int uid = get_uid();
+    if(uid == 0)
+    {
+      cout << "请输入合法的uid" << endl;
+      getch();
+      continue;
+    }
+    auto finded = _rid_map.find(uid);
+    if(finded == _rid_map.end())
+    {
+      cout << "不存在该用户" << endl;
+      getch();
+      continue;
+    }
+      reader_info_change_scence(*finded->second);
+    }
       break;
     case '3':
       // delete a reader
+    {
+        int uid = get_uid();
+        if(uid == 0)
+        {
+            cout << "输入的uid不合法" << endl;
+            getch();
+            continue;
+        }
+        auto finded = _rid_map.find(uid);
+         if(finded == _rid_map.end())
+        {
+            cout << "没有此用户" << endl;
+            getch();
+            continue;
+        }
+        _uid_map.erase(uid);
+        _rid_map.erase(uid);
+        _rname_map.erase(finded->second->getName());
+        cout << "删除成功" << endl;
+        getch();
+    }
       break;
     case '4':
       // serch a reader
+        reader_info_serch_scence();
       break;
     case '5':
       // view all reader
+      for(const auto & it : _rid_map)
+      {
+        cout << *it.second << endl;
+      }
+      getch();
       break;
     case '6':
       return;
@@ -260,9 +410,14 @@ void LibMS::book_manage_scence() {
     switch (ch) {
     case '1':
       // input book
+      {
+      }
       break;
     case '2':
-      book_info_change_scence();
+    {
+
+    }
+      // book_info_change_scence(Book());
       break;
     case '3':
       book_serch_scence();
@@ -293,37 +448,80 @@ void LibMS::book_stream_scence() {
   }
 }
 
-void LibMS::user_info_change_scence() {
+void LibMS::user_info_change_scence(User & user) {
   while (true) {
     user_info_change_menu();
+    int uid = get_uid();
+    if(uid == 0)
+    {
+      cout << "输入的uid不合法" << endl;
+      getch();
+      continue;
+    }
+    auto finded = _uid_map.find(uid);
+    if(finded == _uid_map.end())
+    {
+      cout << "不存在该用户" << endl;
+      getch();
+      continue;
+    }
 
+    
     char ch = getch();
     switch (ch) {
     case '1':
       // change password
-      break;
+      if(Password::setNewPassword(*finded->second))
+      {
+        cout << "设置新密码成功" << endl;
+        getch();
+      }
     case '2':
       // change flag
+      {
+        cout << "user admin/book admin(1/2)";
+        char ch = getch();
+        ch -= 48;
+        if(ch != User::USES_ADMIN && ch != User::BOOK_ADMIN )
+        {
+          cout << "违法输入" << endl;
+          getch();
+          break;
+        }
+        finded->second->setFlag(ch);
+        cout << "修改成功" << endl;
+        getch();
+      }
       break;
     case '3':
       return;
     }
   }
 }
-void LibMS::reader_info_change_scence() {
+void LibMS::reader_info_change_scence(Reader & reader) {
   while (true) {
     reader_info_change_menu();
-
     char ch = getch();
     switch (ch) {
     case '1':
       // name
+        reader.setName(cin_string("请输入新名字"));
+        cout << "修改成功" << endl;
+        getch();
       break;
     case '2':
       // place
+      {
+        reader.setPlace(cin_string("请输入新的住址:"));
+        cout << "修改成功" << endl;
+        getch();
+      }
       break;
     case '3':
       // phone
+      reader.setCon(cin_string("请输入一个新的联系方式:"));
+        cout << "修改成功" << endl;
+        getch();
       break;
     case '4':
       return;
@@ -353,7 +551,7 @@ void LibMS::book_serch_scence() {
     }
   }
 }
-void LibMS::book_info_change_scence() {
+void LibMS::book_info_change_scence(Book & book) {
   while (true) {
     book_info_change_menu();
 
@@ -375,4 +573,56 @@ void LibMS::book_info_change_scence() {
       return;
     }
   }
+}
+
+void LibMS::reader_info_serch_scence()
+{
+    while (true) {
+      reader_info_serch_menu();
+        char ch = getch();
+        switch (ch) {
+        case '1' :
+        {
+            int uid = get_uid();
+            if(uid == 0)
+            {
+                cout << "输入的uid不合法" << endl;
+                getch();
+                continue;
+            }
+            auto finded = _rid_map.find(uid);
+            if(finded == _rid_map.end())
+            {
+                cout << "没有查找到此读者" << endl;
+                getch();
+                continue;
+            }
+            cout << *finded->second << endl;
+            getch();
+        }
+        break;
+        case '2' :
+        {
+            string name;
+            cout << "请输入姓名" << endl;
+            cin >> name;
+            cin.get();
+            auto finded_pair = _rname_map.equal_range(name);
+            if(_rname_map.find(name) == _rname_map.end())
+            {
+                cout << "没有找到" << endl;
+                getch();
+                continue;
+            }
+            for(auto it = finded_pair.first; it != finded_pair.second; ++it)
+            {
+                cout << *it->second.lock() << endl;
+            }
+            getch();
+        }
+        break;
+        case '3' :
+            return;
+        }
+    }
 }

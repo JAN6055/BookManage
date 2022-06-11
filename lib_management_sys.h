@@ -17,7 +17,7 @@ using std::weak_ptr;
 #define READER_DATA "/readerdata"
 #define BOOK_DATA   "/bookdata"
 
-
+enum SING_STYLE {NO_READER = 0, READER = 1};
 class LibMS
 {
 public:
@@ -34,6 +34,8 @@ public:
     ~LibMS()
     {
         writeAllUser(_data_path + USER_DATA);
+        writeAllReader(_data_path + READER_DATA);
+        writeAllBook(_data_path + BOOK_DATA);
     }
     User & findUser(int uid)
     {
@@ -52,17 +54,18 @@ public:
 
     void run();
     bool log_in();
-    bool sing_up();
+    bool sing_up(SING_STYLE = SING_STYLE::READER);
 protected:
     void main_scence();
     void user_manage_scence();
     void reader_manage_scence();
     void book_manage_scence();
     void book_stream_scence();
-    void user_info_change_scence();
-    void reader_info_change_scence();
+    void user_info_change_scence(User & user);
+    void reader_info_change_scence(Reader & reader);
+    void reader_info_serch_scence();
     void book_serch_scence();
-    void book_info_change_scence();
+    void book_info_change_scence(Book & book);
 private:
 
     void readAllUser(const string & path);
@@ -71,12 +74,15 @@ private:
     // void readAllBookBorrowedTot(const string & path);
     // void readAllReaderBorrowTot(const string & path);
     void writeAllUser(const string & path);
+    void writeAllReader(const string & parh);
+    void writeAllBook(const string & path);
+
     weak_ptr<User>       _loging_user;
     //                         key, data
     //uid rid is only
     using uid_map_type   = map<int,shared_ptr<User>>;
     using rid_map_type   = map<int,shared_ptr<Reader>>;
-    using rname_map_type = map<string,weak_ptr<Reader>>;
+    using rname_map_type = multimap<string,weak_ptr<Reader>>;
     
     //bid is only and others is not only
     using bid_map_type   = map<string,shared_ptr<Book>>;

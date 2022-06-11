@@ -40,6 +40,10 @@ public:
     {
         return _flag;
     }
+    virtual void setFlag(int flag)
+    {
+        _flag = flag;
+    }
     static shared_ptr<User> read(ifstream & is);
 protected:
     int _id;

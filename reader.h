@@ -3,6 +3,7 @@
 #include "user.h"
 #include <fstream>
 #include <memory>
+#include <utility>
 using std::shared_ptr;
 class Reader : public User
 {
@@ -58,7 +59,32 @@ public:
             return;
         ++_borrowed;
     }
+    void setName(string && new_name)
+    {
+        _name = std::move(new_name);
+    }
+    void setName(const string & new_name)
+    {
+        _name = new_name;
+    }
+    void setPlace(const string & new_place)
+    {
+        _place = new_place;
+    }
+    void setPlace(string && new_place)
+    {
+        _place = std::move(new_place);
+    }
+    void setCon(const string & new_con)
+    {
+        _contact_details = new_con;
+    }
+    void setCon(string && new_con)
+    {
+        _contact_details = std::move(new_con);
+    }
     static shared_ptr<Reader> read(ifstream & fis);
+    
 private:
     string _name;
     string _place;
@@ -67,5 +93,5 @@ private:
     int _borrowed;
 };
 
-ostream & operator<<(ostream & os, const User & user);
+ostream & operator<<(ostream & os, const Reader & reader);
 #endif

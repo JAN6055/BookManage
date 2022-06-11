@@ -26,14 +26,14 @@ public:
             cout << "两次密码不相同" << endl;
             return false;
         }
-        else if(checkInvalid(new_password) == PASS)
+
+         if(checkInvalid(new_password) == PASS)
         {
             t.setPassword(std::move(new_password));
             return true;
         }
-        else
-            return false; 
-        }
+        return false; 
+    }
 
 };
 

@@ -50,5 +50,13 @@ int get_uid()
     return std::stoi(uid.c_str());
 }
 
+string cin_string(const string & message)
+{
+    cout << message;
+    string ret;
+    cin >> ret;
+    cin.get();
+    return ret;
+}
 
 

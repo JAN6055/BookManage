@@ -38,6 +38,16 @@ void user_info_change_menu()
     printf("+-----------------------+\n");
  
 }
+
+void reader_info_serch_menu()
+{
+    system("clear");
+    printf("+-----------------------+\n");
+    printf("\t1.按uid查询\n");
+    printf("\t2.按姓名查询\n");
+    printf("\t3.返回\n");
+    printf("+-----------------------+\n");
+}
 void reader_info_change_menu()
 {
     system("clear");

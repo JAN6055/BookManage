@@ -62,6 +62,6 @@ struct less_bpub
 };
 
 int get_uid();
-
+string cin_string(const string & message = "");
 
 #endif

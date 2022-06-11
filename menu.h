@@ -37,4 +37,5 @@ void book_info_change_menu();
  
 void book_info_serch_menu();
 
+void reader_info_serch_menu();
 #endif
