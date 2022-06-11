@@ -12,12 +12,16 @@ class Book
     friend istream & operator>>(istream & is, Book & book);
 public:
     Book(int log_id) : _log_id(log_id)
-    { }
+    { 
+        ++_book_tot;
+    }
     Book(int log_id, const string & book_id, const string & book_name, 
         const string & author, const string & pub) 
         : _log_id(log_id), _book_id(book_id), _book_name(book_name),
         _author(author), _pub(pub)
-    { }
+    { 
+        ++_book_tot;
+    }
     int getLogId() const
     {
         return _log_id;

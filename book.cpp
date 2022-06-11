@@ -18,6 +18,6 @@ ostream & operator<<(ostream & os, const Book & book)
 istream & operator>>(istream & is, Book & book)
 {
     is >> book._book_id >> book._book_name >> book._author 
-       >> book._author;
+       >> book._pub;
     return is;
 }
