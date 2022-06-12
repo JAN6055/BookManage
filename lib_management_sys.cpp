@@ -277,6 +277,7 @@ void LibMS::main_scence() {
       {
         cout << "权限不够" << endl;
         getch();
+        continue;
       }
       user_manage_scence();
       break;
@@ -286,7 +287,8 @@ void LibMS::main_scence() {
         cout << "权限不够" << endl;
         getch();
         continue;
-      }   reader_manage_scence();
+      }  
+       reader_manage_scence();
       break;
     case '3':
       if(_loging_user.lock()->getFlag() != User::BOOK_ADMIN)
@@ -298,7 +300,7 @@ void LibMS::main_scence() {
       book_manage_scence();
       break;
     case '4':
-      if(_loging_user.lock()->getId() != User::READER)
+      if(_loging_user.lock()->User::getFlag() != User::READER)
       {
         cout << "你不是读者" << endl;
         getch();
@@ -521,11 +523,18 @@ void LibMS::book_stream_scence() {
           getch();
           continue;
         }
+        auto tmp = _rid_map.find(_loging_user.lock()->getId());
+        if(tmp->second->getAbleBorrow() == 0)
+        {
+          cout << "不能再借阅了" << endl;
+          getch();
+          continue;
+        }
         book_cir_info->_borrowed_tot++;
         book_cir_info->_borrowed++;
         fout << _loging_user.lock()->getId() << " " << rid << " ";
         Date().osoffornt(fout);
-        fout << " " << "返还"<< endl;
+        fout << " " << "借阅"<< endl;
         cout << "借书成功" << endl;
         getch();
       }
@@ -541,7 +550,15 @@ void LibMS::book_stream_scence() {
           getch();
           continue;
         }
+        auto reader = _rid_map.find(_loging_user.lock()->getId());
+        if(reader->second->getBorrowed() == 0)
+        {
+          cout << "你还没有借过书" << endl;
+          getch();
+          continue;
+        }
         finded->second->_borrowed--;
+        reader->second->borrowedDown();
         fout << _loging_user.lock()->getId() << " ";
         Date().osoffornt(fout);
         fout << "返还" << endl;

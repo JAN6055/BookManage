@@ -3,6 +3,7 @@
 #include "user.h"
 #include <fstream>
 #include <memory>
+#include <type_traits>
 #include <utility>
 using std::shared_ptr;
 class Reader : public User
@@ -58,6 +59,12 @@ public:
         if(_borrowed == getAbleBorrow())
             return;
         ++_borrowed;
+    }
+    void borrowedDown()
+    {
+        if(_borrowed <= 0)
+            return;
+        --_borrowed;
     }
     void setName(string && new_name)
     {
