@@ -5,7 +5,7 @@
 #include <iostream>
 #include <fstream>
 #include <ostream>
-using std::shared_ptr;
+// using std::shared_ptr;
 using std::ostream;
 enum TIME_ZONE {UCT = 8};
 class Date
@@ -14,8 +14,10 @@ public:
     explicit Date(char delimiter = '-') : _delimiter(delimiter)
     {
         time_t times = time(nullptr);
-//        _time = std::make_shared<tm>(std::localtime(&times));
+        //return a static obi so don't use to delete
+        _time = std::localtime(&times);
     }
+
     int year() const
     {
         return 1900 + _time->tm_year;
@@ -50,12 +52,21 @@ public:
     {
         os << hour() << _delimiter << minute() << _delimiter << second();
     }
+
+    char getDelimiter() const
+    {
+        return _delimiter;
+    }
+
+    void osoffornt(ostream & os)
+    {
+        os << year() << _delimiter << month() << _delimiter << day();
+    }
 private:
     char _delimiter;
-    shared_ptr<tm> _time;
+    tm * _time;
 };
 
-ostream & operator<<(ostream & os, const Date & date);
 
 
 

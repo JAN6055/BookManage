@@ -1,5 +1,6 @@
 #ifndef BS__TOOLS_H_
 #define BS__TOOLS_H_
+#include "bookcirinfo.h"
 #include "user.h"
 #include "book.h"
 #include "reader.h"
@@ -60,6 +61,7 @@ struct less_bpub
     }
     
 };
+
 
 int get_uid();
 string cin_string(const string & message = "");

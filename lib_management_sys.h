@@ -3,6 +3,8 @@
 #include "user.h"
 #include "reader.h"
 #include "book.h"
+#include "bookcirinfo.h"
+#include "tools.h"
 #include <cstdio>
 #include <map>
 #include <memory>
@@ -12,11 +14,13 @@ using std::shared_ptr;
 using std::multimap;
 using std::map;
 using std::weak_ptr;
+// using std::set;
 
 #define USER_DATA   "/userdata"
 #define READER_DATA "/readerdata"
 #define BOOK_DATA   "/bookdata"
-
+#define BOOK_CIR_DATA "/bookcirdata"
+#define CIR_LOG "/dirlog"
 enum SING_STYLE {NO_READER = 0, READER = 1};
 class LibMS
 {
@@ -29,6 +33,7 @@ public:
         readAllUser(path + USER_DATA);
         readAllReader(path + READER_DATA);
         readAllBook(path + BOOK_DATA);
+        readAllBookCirInfo(path + BOOK_CIR_DATA);
     }
 
     ~LibMS()
@@ -36,6 +41,7 @@ public:
         writeAllUser(_data_path + USER_DATA);
         writeAllReader(_data_path + READER_DATA);
         writeAllBook(_data_path + BOOK_DATA);
+        writeAllBookCirInfo(_data_path + BOOK_CIR_DATA);
     }
     User & findUser(int uid)
     {
@@ -67,15 +73,14 @@ protected:
     void book_serch_scence();
     void book_info_change_scence(Book & book);
 private:
-
     void readAllUser(const string & path);
     void readAllReader(const string & path);
     void readAllBook(const string & path);
-    // void readAllBookBorrowedTot(const string & path);
-    // void readAllReaderBorrowTot(const string & path);
     void writeAllUser(const string & path);
     void writeAllReader(const string & parh);
     void writeAllBook(const string & path);
+    void readAllBookCirInfo(const string & path);
+    void writeAllBookCirInfo(const string & path);
 
     weak_ptr<User>       _loging_user;
     //                         key, data
@@ -90,6 +95,8 @@ private:
     using baut_map_type  = multimap<string,weak_ptr<Book>>;
     using bpub_map_type  = multimap<string,weak_ptr<Book>>;
 
+    using book_cir_map_type  = map<string,shared_ptr<BookCirInfo>>;
+
     string _data_path;
     uid_map_type         _uid_map;
     
@@ -100,6 +107,7 @@ private:
     bname_map_type       _bname_map;
     baut_map_type        _baut_map;
     bpub_map_type        _bpub_map;
+    book_cir_map_type    _book_cir_map;
 };
 
 #endif

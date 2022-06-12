@@ -4,11 +4,14 @@
 #include "reader.h"
 #include "tools.h"
 #include "user.h"
+#include "bookcirinfo.h"
+#include "date.h"
 #include <algorithm>
 #include <cctype>
 #include <cstdlib>
 #include <exception>
 #include <fstream>
+#include <ios>
 #include <iostream>
 #include <iterator>
 #include <memory>
@@ -115,12 +118,48 @@ void LibMS::writeAllReader(const string &path) {
   auto size = _rid_map.size();
   int i = 0;
   for (const auto &it : _rid_map) {
-    cout << "write a" << endl;
     if (++i == size)
       fout << *it.second;
     else
       fout << *it.second << endl;
   }
+}
+
+void LibMS::readAllBookCirInfo(const string &path) {
+  ifstream fin;
+  fin.open(path);
+  if (!fin.is_open()) {
+    cout << "file" << path << "open fail" << endl;
+    std::abort();
+  }
+  while (!fin.eof()) {
+
+    string bid;
+    fin >> bid;
+    auto book_cir_info = std::make_shared<BookCirInfo>();
+    fin >> *book_cir_info;
+    _book_cir_map.insert({bid, book_cir_info});
+  }
+}
+
+void LibMS::writeAllBookCirInfo(const string &path) {
+  ofstream fout;
+  fout.open(path);
+  if (!fout.is_open()) {
+    cout << "file" << path << "open fail" << endl;
+    std::abort();
+  }
+
+  auto size = _book_cir_map.size();
+  int i = 0;
+  for(const auto & it : _book_cir_map)
+  {
+    fout << it.first << " " << it.second->_book_tot << " " << it.second->_borrowed << " " << it.second->_borrowed_tot;
+    if(++i != size)
+      fout << endl;
+  }
+
+  fout.close();
 }
 void LibMS::run() {
   while (true) {
@@ -234,15 +273,37 @@ void LibMS::main_scence() {
     char ch = getch();
     switch (ch) {
     case '1':
+      if(_loging_user.lock()->getFlag() != User::USES_ADMIN)
+      {
+        cout << "权限不够" << endl;
+        getch();
+      }
       user_manage_scence();
       break;
     case '2':
-      reader_manage_scence();
+      if(_loging_user.lock()->getFlag() != User::BOOK_ADMIN)
+      {
+        cout << "权限不够" << endl;
+        getch();
+        continue;
+      }   reader_manage_scence();
       break;
     case '3':
+      if(_loging_user.lock()->getFlag() != User::BOOK_ADMIN)
+      {
+        cout << "权限不够" << endl;
+        getch();
+        continue;
+      }
       book_manage_scence();
       break;
     case '4':
+      if(_loging_user.lock()->getId() != User::READER)
+      {
+        cout << "你不是读者" << endl;
+        getch();
+        continue;
+      }
       book_stream_scence();
       break;
     case '5':
@@ -394,6 +455,7 @@ void LibMS::book_manage_scence() {
         _bname_map.insert({book->getName(), weak_ptr<Book>(book)});
         _baut_map.insert({book->getAuthor(), weak_ptr<Book>(book)});
         _bpub_map.insert({book->getPub(), weak_ptr<Book>(book)});
+        _book_cir_map.insert({book->getBookId(),std::make_shared<BookCirInfo>(1,0,0)});
         cout << "添加成功" << endl;
         getch();
       }
@@ -402,8 +464,7 @@ void LibMS::book_manage_scence() {
       cout << "请输入要修改的bid" << endl;
       string bid = cin_string();
       auto finded = _bid_map.find(bid);
-      if(finded ==  _bid_map.end())
-      {
+      if (finded == _bid_map.end()) {
         cout << "没有这本书" << endl;
         getch();
         continue;
@@ -417,6 +478,13 @@ void LibMS::book_manage_scence() {
       break;
     case '4':
       // tot
+      {
+        for (const auto &it : _book_cir_map) {
+          cout << it.first << " ";
+          cout << *it.second << endl;
+        }
+        getch();
+      }
       break;
     case '5':
       return;
@@ -426,14 +494,60 @@ void LibMS::book_manage_scence() {
 void LibMS::book_stream_scence() {
   while (true) {
     book_stream_menu();
-
+    ofstream fout;
+    fout.open(_data_path + CIR_LOG, std::ios_base::app);
+    if(!fout.is_open())
+    {
+      cout << "file" << _data_path + CIR_LOG << " open fail" << endl;
+      std::abort();
+    }
     char ch = getch();
     switch (ch) {
     case '1':
       // borrow a book
+      {
+        string rid = cin_string("请输入bid");
+        auto finded = _book_cir_map.find(rid);
+        if(finded == _book_cir_map.end())
+        {
+          cout << "没有这本书" << endl;
+          getch();
+          continue;
+        }
+        auto book_cir_info = finded->second;
+        if(book_cir_info->_borrowed >= book_cir_info->_book_tot)
+        {
+          cout << "这本书没有剩余" << endl;
+          getch();
+          continue;
+        }
+        book_cir_info->_borrowed_tot++;
+        book_cir_info->_borrowed++;
+        fout << _loging_user.lock()->getId() << " " << rid << " ";
+        Date().osoffornt(fout);
+        fout << " " << "返还"<< endl;
+        cout << "借书成功" << endl;
+        getch();
+      }
       break;
     case '2':
       // return a book
+      {
+        string rid = cin_string("请输入bid");
+        auto finded = _book_cir_map.find(rid);
+        if(finded == _book_cir_map.end())
+        {
+          cout << "没有这本书" << endl;
+          getch();
+          continue;
+        }
+        finded->second->_borrowed--;
+        fout << _loging_user.lock()->getId() << " ";
+        Date().osoffornt(fout);
+        fout << "返还" << endl;
+        cout << "成功返还" << endl;
+        getch();
+      }
       break;
     case '3':
       return;
@@ -614,7 +728,11 @@ void LibMS::book_info_change_scence(Book &book) {
     case '4':
       // book_tot
       {
-
+        int tot;
+        cout << "请输入藏书量" << endl;
+        cin >> tot;
+        cin.get();
+        _book_cir_map[book.getBookId()]->_book_tot = tot;
       }
       break;
     case '5':
