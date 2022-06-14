@@ -5,8 +5,16 @@
 #include <ostream>
 using std::istream;
 using std::ostream;
-// using std::cout;
+//记录号不用手动输入
 int Book::_book_tot = 0;
+
+/**
+ * @brief 文件IO与键盘IO公用
+ * 
+ * @param os 
+ * @param book 
+ * @return ostream& 
+ */
 ostream & operator<<(ostream & os, const Book & book)
 {
     os << book.getLogId() << " " << book.getBookId() << " "

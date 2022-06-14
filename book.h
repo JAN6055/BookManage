@@ -1,5 +1,7 @@
 #ifndef BS__BOOK_H_
 #define BS__BOOK_H_
+#include <cstddef>
+#include <cstdlib>
 #include <iostream>
 #include <fstream>
 #include <istream>
@@ -7,10 +9,14 @@
 using std::string;
 using std::istream;
 using std::ostream;
+extern size_t free_count;
+extern size_t malloc_count;
 class Book
 {
     friend istream & operator>>(istream & is, Book & book);
 public:
+    Book()
+    { }
     Book(int log_id) : _log_id(log_id)
     { 
         ++_book_tot;
@@ -79,7 +85,7 @@ public:
     
     static int _book_tot;
 private:
-    const int _log_id;
+    int _log_id;
     string _book_id;
     string _book_name;
     string _author;

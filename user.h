@@ -6,13 +6,17 @@
 #include <memory>
 using std::ostream;
 using std::ifstream;
-using std::shared_ptr;
+extern size_t free_count;
+extern size_t malloc_count;
 class User
 {
+    friend ifstream & operator>>(ifstream & fin, User & user);
     friend ostream & operator<<(ostream & os, const User & user);
 public:
     enum {USES_ADMIN = 1, BOOK_ADMIN = 2, READER = 3};
     
+    User() : _id(0), _password(""), _flag(READER)
+    { }
     User(int id, const string & password, int flag = READER)
         : _id(id), _password(password), _flag(flag)
     { }
@@ -44,7 +48,6 @@ public:
     {
         _flag = flag;
     }
-    static shared_ptr<User> read(ifstream & is);
 protected:
     int _id;
 private:

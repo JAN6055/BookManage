@@ -1,7 +1,8 @@
 #include "user.h"
 #include <fstream>
 #include <memory>
-using std::make_shared;
+
+
 ostream & operator<<(ostream & os, const User & user)
 {
     os << user.getId() << " " << user.getPassword() << " " << user.getFlag();
@@ -9,18 +10,18 @@ ostream & operator<<(ostream & os, const User & user)
 }
 
 /**
- * @brief 从绑定的文件流中获取一个用户，用户的格式必须固定，否则会出错误
+ * @brief 因为密码的影响，不能直接对用户进行重载键盘的输入
+ *        只有对文件输入流的重载，确保文件格式正确，可以有空行
+ *        对于Reader同样
  * 
- * @param is 
- * @return User* 这个指针必须被处理，转换成shared_ptr
+ * @param fin 
+ * @param user 
+ * @return ifstream& 
  */
-shared_ptr<User> User::read(ifstream & is)
+ifstream & operator>>(ifstream & fin, User & user)
 {
-    int id;
-    string password;
-    int flag;
-    is >> id >> password >> flag;
-    return make_shared<User>(id,std::move(password),flag);
+    fin >> user._id
+        >> user._password
+        >> user._flag;
+    return fin;
 }
-
-

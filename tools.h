@@ -13,6 +13,12 @@ char getch();
 char getche();
 
 using std::less;
+
+/**
+ *  下列仿函数没有被真正的使用，作用仅仅是列留着当作备用工具 
+ * 
+ */
+
 struct less_uid
 {
     bool operator()(const User & lhs, const User & rhs)
@@ -65,5 +71,18 @@ struct less_bpub
 
 int get_uid();
 string cin_string(const string & message = "");
+
+template <typename FStream>
+struct FileCloser
+{
+    FStream & _file_stream;
+    FileCloser(FStream & file_stream) : _file_stream(file_stream)
+    { }
+
+    ~FileCloser()
+    {
+        _file_stream.close();
+    }
+};
 
 #endif

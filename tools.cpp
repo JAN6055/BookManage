@@ -7,6 +7,11 @@ using std::string;
 using std::cin;
 
 
+/**
+ * @brief 输入字符立刻刷新缓冲区
+ * 
+ * @return char 
+ */
 char getche()
 {
     char ch;

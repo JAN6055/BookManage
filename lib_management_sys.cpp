@@ -26,85 +26,85 @@ using std::ofstream;
 using std::cerr;
 void LibMS::readAllUser(const string &path) {
   ifstream fin;
+  FileCloser<ifstream> file_closer(fin);
   fin.open(path.c_str());
   if (!fin.is_open()) {
     cerr << "file" << path << "open fail" << endl;
     std::abort();
   }
-  while (!fin.eof()) {
-    shared_ptr<User> user(User::read(fin));
-    _uid_map.insert({user->getId(), user});
+  User user;
+  while (fin >> user) {
+    _uid_map.insert({user.getId(),std::make_shared<User>(std::move(user))});
   }
-  fin.close();
 }
 
 void LibMS::writeAllUser(const string &path) {
   ofstream fout;
+  FileCloser<ofstream> file_closer(fout);
   fout.open(path.c_str());
   if (!fout.is_open()) {
     cerr << "file" << path << "open fail" << endl;
     std::abort();
   }
-  int i = 0;
-  int size = _uid_map.size();
+
   for (const auto &user : _uid_map) {
-    if (++i == size)
-      fout << *user.second;
-    else
       fout << *user.second << endl;
   }
 }
 
 void LibMS::readAllBook(const string &path) {
   ifstream fin;
+  FileCloser<ifstream> file_closer(fin);
   fin.open(path.c_str());
   if (!fin.is_open()) {
     cerr << "file" << path << "open fail" << endl;
     std::abort();
   }
-  while (!fin.eof()) {
-    int log_id;
-    fin >> log_id;
-    auto _book = std::make_shared<Book>(log_id);
-    fin >> *_book;
+  int log_id;
+  shared_ptr<Book> _book;
+  auto pre_fin = [&]() -> bool{
+    if(!(fin >> log_id))
+      return false;
+    _book.reset(new Book(log_id));
+    if(!(fin >> *_book))
+      return false;
+    return true;
+  };
+  while(pre_fin())
+  {
     _bid_map.insert({_book->getBookId(), _book});
     _bname_map.insert({_book->getName(), weak_ptr<Book>(_book)});
     _baut_map.insert({_book->getAuthor(), weak_ptr<Book>(_book)});
     _bpub_map.insert({_book->getPub(), weak_ptr<Book>(_book)});
   }
-  fin.close();
 }
 
 void LibMS::writeAllBook(const string &path) {
   ofstream fout;
+  FileCloser<ofstream> file_closer(fout);
   fout.open(path.c_str());
   if (!fout.is_open()) {
     cerr << "file" << path << "open fail" << endl;
     std::abort();
   }
-
-  auto size = _bid_map.size();
-  int i = 0;
   for (const auto &_pair : _bid_map) {
-    if (++i == size)
-      fout << *_pair.second;
-    else
       fout << *_pair.second << endl;
   }
-  fout.close();
 }
 
 void LibMS::readAllReader(const string &path) {
   ifstream fin;
+  FileCloser<ifstream> file_closer(fin);
   fin.open(path.c_str());
   if (!fin.is_open()) {
     cerr << "file" << path << "open fail" << endl;
     std::abort();
   }
-  while (!fin.eof()) {
-    shared_ptr<Reader> reader(Reader::read(fin));
-    _rid_map.insert({reader->getId(), reader});
-    _rname_map.insert({reader->getName(), weak_ptr<Reader>(reader)});
+  Reader reader;
+  while (fin >> reader) {
+    auto _reader = std::make_shared<Reader>(std::move(reader));
+    _rid_map.insert({reader.getId(), _reader});
+    _rname_map.insert({reader.getName(), weak_ptr<Reader>(_reader)});
   }
 }
 
@@ -115,12 +115,7 @@ void LibMS::writeAllReader(const string &path) {
     cerr << "file" << path << "open fail" << endl;
     std::abort();
   }
-  auto size = _rid_map.size();
-  int i = 0;
   for (const auto &it : _rid_map) {
-    if (++i == size)
-      fout << *it.second;
-    else
       fout << *it.second << endl;
   }
 }
@@ -132,34 +127,29 @@ void LibMS::readAllBookCirInfo(const string &path) {
     cout << "file" << path << "open fail" << endl;
     std::abort();
   }
-  while (!fin.eof()) {
-
-    string bid;
-    fin >> bid;
-    auto book_cir_info = std::make_shared<BookCirInfo>();
-    fin >> *book_cir_info;
-    _book_cir_map.insert({bid, book_cir_info});
+  
+  string bid;
+  BookCirInfo book_cir_info;
+  while (fin >> bid && fin >> book_cir_info) {
+    _book_cir_map.insert({bid, std::make_shared<BookCirInfo>(std::move(book_cir_info))});
   }
 }
 
 void LibMS::writeAllBookCirInfo(const string &path) {
   ofstream fout;
+  FileCloser<ofstream> file_closer(fout);
   fout.open(path);
   if (!fout.is_open()) {
     cout << "file" << path << "open fail" << endl;
     std::abort();
   }
 
-  auto size = _book_cir_map.size();
-  int i = 0;
   for(const auto & it : _book_cir_map)
   {
-    fout << it.first << " " << it.second->_book_tot << " " << it.second->_borrowed << " " << it.second->_borrowed_tot;
-    if(++i != size)
-      fout << endl;
+    fout << it.first << " " << it.second->_book_tot << " " 
+         << it.second->_borrowed << " "
+         << it.second->_borrowed_tot << endl;
   }
-
-  fout.close();
 }
 void LibMS::run() {
   while (true) {
@@ -532,6 +522,9 @@ void LibMS::book_stream_scence() {
         }
         book_cir_info->_borrowed_tot++;
         book_cir_info->_borrowed++;
+        
+        cout << "---" << endl;
+        _rid_map[_loging_user.lock()->getId()]->borrowedUp();
         fout << _loging_user.lock()->getId() << " " << rid << " ";
         Date().osoffornt(fout);
         fout << " " << "借阅"<< endl;
@@ -559,9 +552,9 @@ void LibMS::book_stream_scence() {
         }
         finded->second->_borrowed--;
         reader->second->borrowedDown();
-        fout << _loging_user.lock()->getId() << " ";
+        fout << _loging_user.lock()->getId() << " " << rid <<" ";
         Date().osoffornt(fout);
-        fout << "返还" << endl;
+        fout << " 返还" << endl;
         cout << "成功返还" << endl;
         getch();
       }

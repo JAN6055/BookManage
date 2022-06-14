@@ -7,16 +7,28 @@
 #include <ostream>
 // using std::shared_ptr;
 using std::ostream;
+//北京时间
 enum TIME_ZONE {UCT = 8};
+
+/**
+ * @brief 该类在构造的时候自动获取当前时间，包括年月日时分秒
+ * 
+ */
 class Date
 {
 public:
+    //该类为一次性类,time指针指向静态返回值
+    //请现用现构造
     explicit Date(char delimiter = '-') : _delimiter(delimiter)
     {
         time_t times = time(nullptr);
         //return a static obi so don't use to delete
         _time = std::localtime(&times);
     }
+    
+    //不可进行额外操作
+    Date(const Date &) = delete;
+    Date & operator=(const Date &) = delete;
 
     int year() const
     {
@@ -58,6 +70,7 @@ public:
         return _delimiter;
     }
 
+    //将年月日以分隔符隔开打印到流os中
     void osoffornt(ostream & os)
     {
         os << year() << _delimiter << month() << _delimiter << day();

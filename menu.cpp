@@ -11,7 +11,7 @@ void main_menu()
     printf("\t1.用户管理\n");
     printf("\t2.读者管理\n");
     printf("\t3.图书管理\n");
-    printf("\t4.图书流通管理\n");
+    printf("\t4.图书流通\n");
     printf("\t5.退出系统\n");
     printf("+-----------------------+\n");
 }

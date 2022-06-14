@@ -1,19 +1,25 @@
 #ifndef BS__READER_H_
 #define BS__READER_H_
 #include "user.h"
+#include <cstddef>
 #include <fstream>
 #include <memory>
 #include <type_traits>
 #include <utility>
-using std::shared_ptr;
+
+extern size_t free_count;
+extern size_t malloc_count;
 class Reader : public User
 {
+    friend ifstream & operator>>(ifstream & fin, Reader & reader);
     friend ostream & operator<<(ostream & os, const User & user);
 private:
     using only_read_ret = const string &;
 public:
     enum {STUDENT = 1, TEACHER = 2};
     enum {STUDENT_ABLE_BORROW = 5, TEACHER_ABLE_BORROW = 10};
+    Reader() : User()
+    { }
     Reader(int id, const string & password, const string & name, const string & place, 
         const string & contact_details, int flag,int borrowed = 0)
         : User(id,password,READER), _name(name), _place(place),
@@ -25,7 +31,7 @@ public:
           _place(std::move(place)), _contact_details(std::move(contact_details)),
           _flag(flag), _borrowed(borrowed)
     { }
-    only_read_ret getName() const 
+    only_read_ret getName() const
     {
         return _name;
     }
@@ -90,8 +96,6 @@ public:
     {
         _contact_details = std::move(new_con);
     }
-    static shared_ptr<Reader> read(ifstream & fis);
-    
 private:
     string _name;
     string _place;
